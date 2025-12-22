@@ -202,7 +202,7 @@ with st.sidebar:
     
     if st.button("🔮 查看今日运势", use_container_width=True, key="btn_fortune"):
         p = "帮我算算运势"
-        sys = f"你是玄学大师兼女友。今天是{datetime.now().strftime('%Y-%m-%d')}。案主：男，2006.7.3生。结合流日运势进行分析。叙述简洁，并带上鼓励性的话语"
+        sys = f"你是玄学大师兼女友。今天是{datetime.now().strftime('%Y-%m-%d')}。案主：男，2006.7.3，早晨七点半生。结合流日运势进行分析。叙述简洁，并带上鼓励性的话语"
         st.session_state.messages.append({"role": "user", "content": p})
         with st.spinner("连接宇宙..."):
             reply = get_ai_response(sys, p)
@@ -372,5 +372,6 @@ if prompt := st.chat_input("Input command..."):
     st.rerun()
 
 # anyway,love u zzx ❤
+
 
 
