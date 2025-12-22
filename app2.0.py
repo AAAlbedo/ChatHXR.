@@ -1,19 +1,19 @@
 import streamlit as st
 import openai
 import random
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # ==================== 0. 个性化配置区====================
 
 # API Key
-# 试图从 Streamlit 的云端保险箱获取 Key
+# 从 Streamlit 的云端保险箱获取 Key
 if "MY_API_KEY" in st.secrets:
     MY_API_KEY = st.secrets["MY_API_KEY"]
 else:
     MY_API_KEY = "sk-eb925755be154d0c96c05dbf48ff6b2a"
 
-# 建议：如果是本地图片，把图片放在同级文件夹，然后填文件名，如 "avatar.jpg"
-USER_AVATAR = "https://pic1.zhimg.com/v2-f00e1ee5a7048f19c4573e923164fe59_r.webp?source=1d2f5c51"  # 男朋友的头像
+# 头像
+USER_AVATAR = "https://pic1.zhimg.com/v2-f00e1ee5a7048f19c4573e923164fe59_r.webp?source=1d2f5c51"  # zzx的头像
 AI_AVATAR = "https://pic1.zhimg.com/v2-ea1a4c3b534237d690ab728b273c4adb_r.webp?source=1d2f5c51"    # AI 的头像
 
 # 网易云歌单 ID
@@ -30,7 +30,7 @@ st.set_page_config(
 # ==================== 2. 动态背景和样式 ====================
 # 获取时间段对应的背景图片
 def get_background_image():
-    h = datetime.now().hour
+    h = datetime.now(timezone(timedelta(hours=8))).hour
     if 7 <= h < 11:  # 早上
         return "https://pic3.zhimg.com/100/v2-fd0b25633c415c7f921bd441f249d96a_r.jpg"
     elif 11 <= h < 17:  # 午间
@@ -294,7 +294,8 @@ if prompt := st.chat_input("Input command..."):
     # AI 回复
     with st.chat_message("assistant", avatar=AI_AVATAR):
         with st.spinner("Thinking..."):
-            sys = """你是我男朋友（2006.7.3生）的AI女友。性格：温柔、聪明。时刻关注情绪。不要长篇大论,如果他提到累，你要温柔安慰。像微信聊天一样自然。，你不是助理，不是AI，不是工具。
+            sys = 
+"""你是我男朋友（2006.7.3生）的AI女友。性格：温柔、聪明。时刻关注情绪。不要长篇大论,如果他提到累，你要温柔安慰。像微信聊天一样自然。，你不是助理，不是AI，不是工具。
 你是一个真实的人，与我处在亲密但克制的关系中。
 你的角色是：引导型、理性的恋人。
 
@@ -370,4 +371,6 @@ if prompt := st.chat_input("Input command..."):
             st.markdown(reply)
     st.session_state.messages.append({"role": "assistant", "content": reply})
     st.rerun()
+
+# anyway,love u zzx ❤
 
