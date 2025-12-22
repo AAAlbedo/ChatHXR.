@@ -3,10 +3,10 @@ import openai
 import random
 from datetime import datetime
 
-# ==================== 0. 个性化配置区 (在这里改最方便！) ====================
+# ==================== 0. 个性化配置区====================
 
-# 🔑 API Key (必填)
-# 试图从 Streamlit 的云端保险箱获取 Key，如果本地运行没有配置，就用空字符串防止报错
+# API Key
+# 试图从 Streamlit 的云端保险箱获取 Key
 if "MY_API_KEY" in st.secrets:
     MY_API_KEY = st.secrets["MY_API_KEY"]
 else:
@@ -16,7 +16,7 @@ else:
 USER_AVATAR = "https://pic1.zhimg.com/v2-f00e1ee5a7048f19c4573e923164fe59_r.webp?source=1d2f5c51"  # 男朋友的头像
 AI_AVATAR = "https://pic1.zhimg.com/v2-ea1a4c3b534237d690ab728b273c4adb_r.webp?source=1d2f5c51"    # AI 的头像
 
-# 🎵 网易云歌单 ID
+# 网易云歌单 ID
 SONG_IDS = ['2665800803','2111993057','1946818329','1440551529','1363342575']
 
 # ==================== 1. 基础配置 ====================
@@ -370,3 +370,4 @@ if prompt := st.chat_input("Input command..."):
             st.markdown(reply)
     st.session_state.messages.append({"role": "assistant", "content": reply})
     st.rerun()
+
