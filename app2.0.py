@@ -48,8 +48,6 @@ has_messages = len(st.session_state.get("messages", [])) > 0
 bg_opacity = 0.6 if has_messages else 0.15
 snow_state = st.session_state.get("snow_state", "stop")
 
-# ==================== 替换后的新代码 ====================
-
 # 1. 静态样式 (背景图、聊天框美化)
 st.markdown(f"""
 <style>
@@ -79,8 +77,8 @@ header[data-testid="stHeader"] {{background: transparent;}}
 """, unsafe_allow_html=True)
 
 # 2. 强力下雪脚本 (使用 components 组件穿透 iframe)
-# 这里的代码会直接注入到浏览器主窗口，不再被 st.markdown 拦截
-import streamlit.components.v1 as components  # 必须引入这个库
+# 直接注入到浏览器主窗口，不被 st.markdown 拦截
+import streamlit.components.v1 as components  # 引入components库很关键
 snow_html = f"""
 <script>
     // 1. 穿透 Streamlit 的 iframe，直接操作父页面 (浏览器窗口)
@@ -182,10 +180,10 @@ def get_ai_response(system_prompt, user_message):
 
 # 修复后的时间问候逻辑 (覆盖全天24小时)
 def get_time_greeting():
-    h = datetime.now().hour
+    h = datetime.now(timezone(timedelta(hours=8))).hour
     
     if 7 <= h < 11:
-        return "☀️ 早安", "哦嗨哟，今天也是可爱的一天！\nMorning~ 记得吃早饭哦。"
+        return "☀️ 早安", "哦嗨哟，今天也是可爱的一天！\n古德猫宁~ 记得吃早饭哦。"
     elif 11 <= h < 17: # 包含了 13点
         return "🍱 午安", "绿树阴浓夏日长，楼台倒影入池塘。\n午间总是藏着静谧与盛大。"
     elif 17 <= h < 22: # 扩大了晚上的范围
@@ -372,6 +370,7 @@ if prompt := st.chat_input("Input command..."):
     st.rerun()
 
 # anyway,love u zzx ❤
+
 
 
 
