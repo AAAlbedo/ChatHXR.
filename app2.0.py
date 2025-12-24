@@ -283,7 +283,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # C. 输入框
-if prompt := st.chat_input("Input command..."):
+if prompt := st.chat_input("今天心情如何？"):
     # 显示用户
     with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(prompt)
@@ -378,4 +378,5 @@ if prompt := st.chat_input("Input command..."):
 -2.input command
 -3.颜表情如何？？
 """
+
 
