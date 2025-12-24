@@ -372,5 +372,10 @@ if prompt := st.chat_input("Input command..."):
 # anyway,love u zzx ❤
 
 
-
+"""
+可能需要改进的点：
+-1.切歌删掉，直接换推歌
+-2.input command
+-3.颜表情如何？？
+"""
 
