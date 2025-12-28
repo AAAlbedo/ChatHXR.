@@ -369,6 +369,207 @@ if prompt := st.chat_input("今天心情如何？"):
     st.session_state.messages.append({"role": "assistant", "content": reply})
     st.rerun()
 
+# ... (接在“戳我了解民科物理”按钮后面) ...
+
+    if st.button("🧘 进入精神时光屋 (自习室)", use_container_width=True, key="btn_study"):
+        # 这里的 JS 负责创建全屏覆盖层，不依赖 Python 状态，退出即销毁
+        study_js = """
+        <script>
+            var parentDoc = window.parent.document;
+            
+            // 1. 清理可能存在的旧自习室
+            var old = parentDoc.getElementById('study-room-overlay');
+            if (old) old.remove();
+
+            // 2. 创建全屏黑色容器
+            var overlay = parentDoc.createElement('div');
+            overlay.id = 'study-room-overlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background-color: #000; z-index: 1000000; color: #fff;
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                font-family: 'Arial', sans-serif; overflow: hidden;
+            `;
+
+            // 3. 定义内部 HTML 结构
+            overlay.innerHTML = `
+                <!-- 碰撞动画图片 -->
+                <img id="dvd-logo" src="https://pic1.zhimg.com/v2-ea1a4c3b534237d690ab728b273c4adb_r.webp?source=1d2f5c51" 
+                     style="position: absolute; width: 100px; height: 100px; border-radius: 50%; opacity: 0.6; pointer-events: none;">
+                
+                <!-- 阶段 1: 设置界面 -->
+                <div id="setup-panel" style="text-align: center; z-index: 2; background: rgba(0,0,0,0.8); padding: 40px; border-radius: 20px; border: 1px solid #333;">
+                    <h1 style="font-size: 2.5em; margin-bottom: 20px; color: #64ffda; text-shadow: 0 0 10px #64ffda;">少年，你渴望力量吗？</h1>
+                    <p style="font-size: 1.2em; color: #aaa; margin-bottom: 30px;">快快点击屏幕开启自习吧</p>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <span style="font-size: 1.2em;">设定时长(分钟): </span>
+                        <input type="number" id="study-time" value="25" min="1" max="120" 
+                               style="font-size: 1.5em; width: 80px; text-align: center; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; padding: 5px;">
+                    </div>
+                    
+                    <button onclick="startStudy()" style="font-size: 1.5em; padding: 10px 40px; background: #64ffda; color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                        🚀 开始专注
+                    </button>
+                    <br><br>
+                    <button onclick="exitStudy()" style="background: transparent; border: 1px solid #666; color: #888; padding: 5px 15px; border-radius: 15px; cursor: pointer;">
+                        🔙 返回聊天
+                    </button>
+                </div>
+
+                <!-- 阶段 2: 专注中界面 (默认隐藏) -->
+                <div id="focus-panel" style="display: none; text-align: center; z-index: 2; width: 100%;">
+                    <h1 id="timer-display" style="font-size: 6em; font-family: 'Courier New', monospace; margin: 0; color: #fff;">25:00</h1>
+                    <p style="color: #666; margin-top: -10px;">保持专注...</p>
+                    
+                    <div style="margin-top: 40px; display: flex; gap: 20px; justify-content: center;">
+                        <button id="btn-bach" onclick="toggleAudio('bach')" style="padding: 10px 20px; background: #333; color: #fff; border: 1px solid #555; border-radius: 10px; cursor: pointer;">
+                            🎹 巴赫平均律
+                        </button>
+                        <button id="btn-eva" onclick="toggleAudio('eva')" style="padding: 10px 20px; background: #333; color: #fff; border: 1px solid #555; border-radius: 10px; cursor: pointer;">
+                            🎐 EVA蝉鸣
+                        </button>
+                    </div>
+
+                    <button onclick="exitStudy()" style="margin-top: 50px; padding: 10px 30px; background: rgba(255, 50, 50, 0.2); border: 1px solid red; color: #ff6b6b; border-radius: 20px; cursor: pointer;">
+                        ⏹️ 放弃/退出
+                    </button>
+                </div>
+
+                <!-- 阶段 3: 完成界面 (默认隐藏) -->
+                <div id="finish-panel" style="display: none; text-align: center; z-index: 2;">
+                    <h1 style="font-size: 3em; color: #ffd700;">🎉 恭喜你完成目标！</h1>
+                    <p style="font-size: 1.5em; margin: 20px 0;">期待再见喵~</p>
+                    <button onclick="exitStudy()" style="font-size: 1.5em; padding: 10px 40px; background: #64ffda; color: #000; border: none; border-radius: 30px; cursor: pointer;">
+                        🚪 退出自习室
+                    </button>
+                </div>
+
+                <!-- 音频元素 -->
+                <audio id="audio-bach" loop src="https://plain-azure-6sghauslhk-a3rt4xol1k.edgeone.app/平均律.mp3"></audio>
+                <audio id="audio-eva" loop src="https://bold-green-c17xjxpfq5-xifi4cyfqd.edgeone.app/split.mp3"></audio>
+            `;
+            
+            parentDoc.body.appendChild(overlay);
+
+            // ==================== 逻辑部分 ====================
+            
+            // 全局变量
+            var timerInterval;
+            var dvdInterval;
+            var currentAudio = null;
+
+            // 1. 碰撞动画逻辑 (DVD Screensaver)
+            var img = parentDoc.getElementById('dvd-logo');
+            var x = Math.random() * (window.innerWidth - 100);
+            var y = Math.random() * (window.innerHeight - 100);
+            var dx = 2; // 水平速度
+            var dy = 2; // 垂直速度
+            
+            function moveDVD() {
+                var w = window.innerWidth;
+                var h = window.innerHeight;
+                
+                x += dx;
+                y += dy;
+                
+                // 碰撞检测
+                if (x + 100 >= w || x <= 0) { dx = -dx; }
+                if (y + 100 >= h || y <= 0) { dy = -dy; }
+                
+                img.style.left = x + 'px';
+                img.style.top = y + 'px';
+                
+                dvdInterval = requestAnimationFrame(moveDVD);
+            }
+            // 启动动画
+            dvdInterval = requestAnimationFrame(moveDVD);
+
+            // 2. 开始自习逻辑
+            window.startStudy = function() {
+                var min = parentDoc.getElementById('study-time').value;
+                var seconds = min * 60;
+                
+                parentDoc.getElementById('setup-panel').style.display = 'none';
+                parentDoc.getElementById('focus-panel').style.display = 'block';
+                
+                var display = parentDoc.getElementById('timer-display');
+                
+                // 倒计时
+                timerInterval = setInterval(function() {
+                    seconds--;
+                    var m = Math.floor(seconds / 60);
+                    var s = seconds % 60;
+                    display.innerText = (m < 10 ? '0'+m : m) + ':' + (s < 10 ? '0'+s : s);
+                    
+                    if (seconds <= 0) {
+                        finishStudy();
+                    }
+                }, 1000);
+            };
+
+            // 3. 结束逻辑
+            function finishStudy() {
+                clearInterval(timerInterval);
+                stopAllAudio();
+                parentDoc.getElementById('focus-panel').style.display = 'none';
+                parentDoc.getElementById('finish-panel').style.display = 'block';
+            }
+
+            // 4. 音频控制逻辑
+            window.toggleAudio = function(type) {
+                var audioBach = parentDoc.getElementById('audio-bach');
+                var audioEva = parentDoc.getElementById('audio-eva');
+                var btnBach = parentDoc.getElementById('btn-bach');
+                var btnEva = parentDoc.getElementById('btn-eva');
+
+                // 如果点击正在播放的，就暂停
+                if (type === 'bach' && !audioBach.paused) {
+                    audioBach.pause();
+                    btnBach.style.background = '#333';
+                    return;
+                }
+                if (type === 'eva' && !audioEva.paused) {
+                    audioEva.pause();
+                    btnEva.style.background = '#333';
+                    return;
+                }
+
+                // 停止所有音频
+                audioBach.pause();
+                audioEva.pause();
+                btnBach.style.background = '#333';
+                btnEva.style.background = '#333';
+
+                // 播放选中的
+                if (type === 'bach') {
+                    audioBach.play();
+                    btnBach.style.background = '#64ffda';
+                    btnBach.style.color = '#000';
+                } else if (type === 'eva') {
+                    audioEva.play();
+                    btnEva.style.background = '#64ffda';
+                    btnEva.style.color = '#000';
+                }
+            };
+            
+            function stopAllAudio() {
+                parentDoc.getElementById('audio-bach').pause();
+                parentDoc.getElementById('audio-eva').pause();
+            }
+
+            // 5. 退出自习室 (清理现场)
+            window.exitStudy = function() {
+                clearInterval(timerInterval);
+                cancelAnimationFrame(dvdInterval);
+                stopAllAudio();
+                var el = parentDoc.getElementById('study-room-overlay');
+                if (el) el.remove();
+            };
+
+        </script>
+        """
+        st.components.v1.html(study_js, height=0, width=0)
 # anyway,love u zzx ❤
 
 
@@ -379,6 +580,7 @@ if prompt := st.chat_input("今天心情如何？"):
 -3.颜表情如何？？
 -4.线上自习室，陪伴学习
 """
+
 
 
 
