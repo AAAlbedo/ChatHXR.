@@ -234,15 +234,6 @@ with st.sidebar:
             st.session_state.messages.append({"role": "assistant", "content": reply})
         st.rerun()
 
-    if st.button(" FlyMe2Baroque电台", use_container_width=True, key="btn_recmusic"):
-        p = "推荐一首歌曲吧"
-        sys = "你是一个专业乐评人，当用户问你推荐歌曲时，从拉赫玛尼诺夫第二钢琴协奏曲、moremorejump的歌曲、李斯特b小调奏鸣曲中随机推荐并写一段富有激情的乐评，以“为什么xxx是神”为开头'。"
-        st.session_state.messages.append({"role": "user", "content": p})
-        with st.spinner("this is ture music..."):
-            reply = get_ai_response(sys, p)
-            st.session_state.messages.append({"role": "assistant", "content": reply})
-        st.rerun()
-
     st.markdown("---")
     # 下雪控制
     st.subheader("❄️ 呼呼呼")
@@ -580,6 +571,7 @@ if prompt := st.chat_input("今天心情如何？"):
         """
         st.components.v1.html(study_js, height=0, width=0)
 # anyway,love u zzx ❤
+
 
 
 
