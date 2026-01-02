@@ -13,7 +13,7 @@ else:
     MY_API_KEY = "sk-eb925755be154d0c96c05dbf48ff6b2a"
 
 # 头像
-USER_AVATAR = "https://pic1.zhimg.com/v2-f00e1ee5a7048f19c4573e923164fe59_r.webp?source=1d2f5c51"  # zzx的头像
+USER_AVATAR = "https://pic1.zhimg.com/v2-e9d71330fc5076c5d6d704fae9234704_r.png?source=1d2f5c51"  # zzx的头像
 AI_AVATAR = "https://pic1.zhimg.com/v2-ea1a4c3b534237d690ab728b273c4adb_r.webp?source=1d2f5c51"    # AI 的头像
 
 # 网易云歌单 ID
@@ -571,6 +571,7 @@ if prompt := st.chat_input("今天心情如何？"):
         """
         st.components.v1.html(study_js, height=0, width=0)
 # anyway,love u zzx ❤
+
 
 
 
